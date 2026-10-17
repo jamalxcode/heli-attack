@@ -1,0 +1,15 @@
+name: Check site
+on: { workflow_dispatch: {} }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: DNS
+        run: dig +short heliattack.sala.company CNAME; dig +short heliattack.sala.company A
+      - name: HTTP
+        run: curl -sS -o /dev/null -w "http %{http_code} -> %{redirect_url}\n" http://heliattack.sala.company/
+      - name: HTTPS
+        run: |
+          curl -sS -o page.html -w "https %{http_code}\n" https://heliattack.sala.company/ || echo "https not ready"
+          grep -o "<title>[^<]*</title>" page.html || true
+          curl -sS -o /dev/null -w "game.js %{http_code}\n" https://heliattack.sala.company/game.js || true
